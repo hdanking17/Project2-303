@@ -80,7 +80,12 @@ set(ax2,'Position',pos)
 linkaxes([ax1,ax2])
 
 %% Loop over time
-
+%update T for interior points
+% Cnew=C;
+% for i=2:Nx-1
+%     Cnew(i)=C(i)+dt*(-Nx*C(i+1)-C(i-1))/(2*dx);
+% end
+C=rand(size(C));
 Nt=(Ndays-1)/dt;
 for n=1:Nt
     % Update time
@@ -101,24 +106,24 @@ for n=1:Nt
     % Update concentration by solving Eq. 2
     for j=2:Ny-1
         for i=2:Nx-1
-            %u
+            %dCdx & u
             if     u>=0
                 dCdx=u*((C(i,j)-C(i-1,j))/dx);
             elseif u<=0
                 dCdx=u*((C(i+1,j)-C(i,j))/dx);
             end
-            %v
+            %dCdy & v
             if     v>=0
                 dCdy=v*((C(i,j)-C(i-1,j))/dy);
             elseif v<=0
                 dCdy=v*((C(i+1,j)-C(i,j))/dy);
             end
         end
-    dCdx=(C(i+1,j)-2*C(i,j)+C(i-1,j))/(dx^2);
-    dCdy=(C(i+1,j)-2*C(i,j)+C(i-1,j))/(dy^2);
-    RHS=dCdx+dCdy+source(i,j);
-    C(i,j)=C(i,j)+dt*RHS;
     end
+    dCdx  = (C(i+1,j)-2*C(i,j)+C(i-1,j))/(dx^2);
+    dCdy  = (C(i+1,j)-2*C(i,j)+C(i-1,j))/(dy^2);
+    RHS   = dCdx+dCdy+source(i,j);
+    C(i,j)= C(i,j)+dt*RHS;
     
     % Apply Neumann boundary conditions (zero slope)
     C( 1,:)=C( 2,:);
