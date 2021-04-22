@@ -80,12 +80,6 @@ set(ax2,'Position',pos)
 linkaxes([ax1,ax2])
 
 %% Loop over time
-%update T for interior points
-% Cnew=C;
-% for i=2:Nx-1
-%     Cnew(i)=C(i)+dt*(-Nx*C(i+1)-C(i-1))/(2*dx);
-% end
-%C=rand(size(C));
 Nt=(Ndays-1)/dt;
 for n=1:Nt
     % Update time
@@ -102,8 +96,15 @@ for n=1:Nt
     % x and y components of wind velocity (miles/day)
     u=-24*mywind_spd*sind(mywind_dir);
     v=-24*mywind_spd*cosd(mywind_dir);
-     %%
+    %%
     % Update concentration by solving Eq. 2
+    %update T for interior points
+%     Cnew=C;
+%     for i=2:Nx-1
+%     Cnew(i)=C(i)+dt*(-Nx*C(i+1)-C(i-1))/(2*dx);
+%     end
+%     C=C=new;
+    %C=rand(size(C));
     C_star=C;
     for j=2:Ny-1
         %ADVECTION
@@ -114,23 +115,24 @@ for n=1:Nt
             elseif u<0
                 dCdx=u*((C(i+1,j)-C(i,j))/dx);
             end
+            
             %dCdy & v
             if     v>=0
                 dCdy=v*((C(i,j)-C(i-1,j))/dy);
             elseif v<0
                 dCdy=v*((C(i+1,j)-C(i,j))/dy);
             end
-        end
         %DIFFUSION
-        dCdx  = (C(i+1,j)-2*C(i,j)+C(i-1,j))/(dx^2);
-        dCdy  = (C(i+1,j)-2*C(i,j)+C(i-1,j))/(dy^2);
+                dCdx  = D*(C(i+1,j)-2*C(i,j)+C(i-1,j))/(dx^2);
+                dCdy  = D*(C(i+1,j)-2*C(i,j)+C(i-1,j))/(dy^2);
+        end
         %Right Hand Side of equation
-        RHS   = dCdx+dCdy+source(i,j);
+                RHS   = dCdx+dCdy+source(i,j);
         %TIME DERIVATIVE
-        C_star(i,j)= C(i,j)+dt*RHS;
+                C_star(i,j)= C(i,j)+dt*RHS;
+        %update C
+                C(i,j)=C_star(i,j);
     end
-    %update C
-    C(i,j)=C_star(i,j);
     
     % Apply Neumann boundary conditions (zero slope)
     C( 1,:)=C( 2,:);
