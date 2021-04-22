@@ -13,8 +13,8 @@ plot_freq=100; % Plot frequency (steps)
 % Pollutant source
 yo=???
 xo=???
-A=???
-sigma=???
+A=1e4; %ppm (parts per million)
+sigma=0.01;
 source=@(x,y) ???
 
 % Load wind data
@@ -77,7 +77,7 @@ Nt=(Ndays-1)/dt;
 for n=1:Nt
     
     % Update time
-    t=t+???;
+    t=t+dt;
     
     % Compute velocity interpolated to this time
     day =1+floor(t);
