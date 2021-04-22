@@ -1,8 +1,8 @@
 %EMEC 303
 %Project 2
-%Diego Armstrong, Hanna King, Carter Storrusten
+%Diego Armstrong, Hannah King, Carter Storrusten
 
-clear all; clc
+clear; clc
 
 % Inputs
 Nx=25; % Grid points in x
@@ -37,7 +37,7 @@ C=zeros(Nx,Ny); % Concentration
 t=0; % Time
 plot_count=0; % Counter to only plot every plot_freq steps
 
-% Create plot with map
+%% Create plot with map
 figure(1); clf(1)
 
 % Get current axes
@@ -47,6 +47,7 @@ ax1=gca;
 axis([x(1),x(Nx),y(1),y(Ny)]);
 plot_google_map('APIKey','AIzaSyDUz4oSBuVc8LvjAqa26WARGJR9jw4-Ghk');
 plot_google_map('AutoAxis',1);
+
 % Plot source location
 plot(xo,yo,'r.','Markersize',50);
 
@@ -78,6 +79,8 @@ set(ax1,'Position',pos)
 set(ax2,'Position',pos)
 linkaxes([ax1,ax2])
 
+%% Loop over time
+
 Nt=(Ndays-1)/dt;
 for n=1:Nt
     % Update time
@@ -100,15 +103,14 @@ for n=1:Nt
         for i=2:Nx-1
             if u>=0
                 dCdx=u*((C(i,j)-C(i-1,j))/dx);
-            else if u<=0
+            elseif u<=0
                 dCdx=u*((C(i+1,j)-C(i,j))/dx);
-                end
             end
+        end
     dCdx=(C(i+1,j)-2*C(i,j)+C(i-1,j))/(dx^2);
     dCdy=(C(i+1,j)-2*C(i,j)+C(i-1,j))/(dy^2);
     RHS=dCdx+dCdy+source(i,j);
     C(i,j)=C(i,j)+dt*RHS;
-        end
     end
     
     % Apply Neumann boundary conditions (zero slope)
