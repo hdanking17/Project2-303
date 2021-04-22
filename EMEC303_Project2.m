@@ -48,7 +48,8 @@ plot_google_map('AutoAxis',1);
 % Plot source location
 plot(xo,yo,'r.','Markersize',50);
 % Create second axes for contour plot
-ax2=axes();set(ax2,'visible','off')
+ax2=axes();
+set(ax2,'visible','off')
 % Add contour plot with colorbar
 hold on
 [c,hc]=contour(x,y,C');
