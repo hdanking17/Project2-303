@@ -81,22 +81,13 @@ set(ax2,'Position',pos)
 linkaxes([ax1,ax2])
 
 %% Loop over time
-<<<<<<< HEAD
-%update T for interior points
-% Cnew=C;
-% for i=2:Nx-1
-%     Cnew(i)=C(i)+dt*(-Nx*C(i+1)-C(i-1))/(2*dx);
-% end
-%C=rand(size(C));
-=======
->>>>>>> 4125fd4da8bb00ea6eaaca023a6528f56eca7ad1
 Nt=(Ndays-1)/dt;
 for n=1:Nt
     % Update time
     t=t+dt;
     
     % Compute velocity interpolated to this time
-    day =1+floor(t);
+    day = 1+floor(t);
     frac=1+t-day;
     
     % Wind speed and direction
@@ -108,32 +99,33 @@ for n=1:Nt
     v=-24*mywind_spd*cosd(mywind_dir);
     %%
     % Update concentration by solving Eq. 2
-    %C=rand(size(C));
     C_star=C;
     for j=2:Ny-1
         %ADVECTION
         for i=2:Nx-1
             %dCdx & u
-            if     u>=0
+            if     u>0
                 dCdx=((C(i,j)-C(i-1,j))/dx);
             elseif u<0
                 dCdx=((C(i+1,j)-C(i,j))/dx);
             end
             
             %dCdy & v
-            if     v>=0
+            if     v>0
                 dCdy=((C(i,j)-C(i,j-1))/dy);
             elseif v<0
                 dCdy=((C(i,j+1)-C(i,j))/dy);
             end
-        end
         %DIFFUSION
-                dCdx2  = D*(C(i+1,j)-2*C(i,j)+C(i-1,j))/(dx^2);
-                dCdy2  = D*(C(i,j+1)-2*C(i,j)+C(i,j-1))/(dy^2);
+                dCdx2  = (C(i+1,j)-2*C(i,j)+C(i-1,j))/(dx^2);
+                dCdy2  = (C(i,j+1)-2*C(i,j)+C(i,j-1))/(dy^2);
+                
         %Right Hand Side of equation
-                RHS   = -v*dCdy-u*dCdx+dCdx2+dCdy2+source(x(i),y(j));
+                RHS   = -(v*dCdy + u*dCdx) + D*(dCdx2 + dCdy2) + source(x(i),y(j));
+                
         %TIME DERIVATIVE
                 C_star(i,j)= C(i,j)+dt*RHS;
+        end
 
     end
         %update C
