@@ -2,8 +2,7 @@
 %Project 2
 %Diego Armstrong, Hanna King, Carter Storrusten
 
-clear all
-clc
+clear all; clc
 
 % Inputs
 Nx=25; % Grid points in x
