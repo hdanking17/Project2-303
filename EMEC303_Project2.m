@@ -101,10 +101,17 @@ for n=1:Nt
     % Update concentration by solving Eq. 2
     for j=2:Ny-1
         for i=2:Nx-1
-            if u>=0
+            %u
+            if     u>=0
                 dCdx=u*((C(i,j)-C(i-1,j))/dx);
             elseif u<=0
                 dCdx=u*((C(i+1,j)-C(i,j))/dx);
+            end
+            %v
+            if     v>=0
+                dCdy=v*((C(i,j)-C(i-1,j))/dy);
+            elseif v<=0
+                dCdy=v*((C(i+1,j)-C(i,j))/dy);
             end
         end
     dCdx=(C(i+1,j)-2*C(i,j)+C(i-1,j))/(dx^2);
