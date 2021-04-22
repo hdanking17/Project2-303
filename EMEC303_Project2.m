@@ -17,7 +17,8 @@ yo=45.817315;
 xo=-111.073837;
 A=1e4;
 sigma=.01;
-source=@(x,y) A*exp(((x-xo)^2+(y-yo)^2)/(2*sigma^2));
+source=@(x,y) A*exp(-((x-xo)^2+(y-yo)^2)/(2*sigma^2));
+
 
 % Load wind data
 data=csvread('wind.csv',1.0);
@@ -98,12 +99,6 @@ for n=1:Nt
     v=-24*mywind_spd*cosd(mywind_dir);
     %%
     % Update concentration by solving Eq. 2
-    %update T for interior points
-%     Cnew=C;
-%     for i=2:Nx-1
-%     Cnew(i)=C(i)+dt*(-Nx*C(i+1)-C(i-1))/(2*dx);
-%     end
-%     C=C=new;
     %C=rand(size(C));
     C_star=C;
     for j=2:Ny-1
@@ -111,29 +106,29 @@ for n=1:Nt
         for i=2:Nx-1
             %dCdx & u
             if     u>=0
-                dCdx=u*((C(i,j)-C(i-1,j))/dx);
+                dCdx=((C(i,j)-C(i-1,j))/dx);
             elseif u<0
-                dCdx=u*((C(i+1,j)-C(i,j))/dx);
+                dCdx=((C(i+1,j)-C(i,j))/dx);
             end
             
             %dCdy & v
             if     v>=0
-                dCdy=v*((C(i,j)-C(i-1,j))/dy);
+                dCdy=((C(i,j)-C(i,j-1))/dy);
             elseif v<0
-                dCdy=v*((C(i+1,j)-C(i,j))/dy);
+                dCdy=((C(i,j+1)-C(i,j))/dy);
             end
-        %DIFFUSION
-                dCdx  = D*(C(i+1,j)-2*C(i,j)+C(i-1,j))/(dx^2);
-                dCdy  = D*(C(i+1,j)-2*C(i,j)+C(i-1,j))/(dy^2);
         end
+        %DIFFUSION
+                dCdx2  = D*(C(i+1,j)-2*C(i,j)+C(i-1,j))/(dx^2);
+                dCdy2  = D*(C(i,j+1)-2*C(i,j)+C(i,j-1))/(dy^2);
         %Right Hand Side of equation
-                RHS   = dCdx+dCdy+source(i,j);
+                RHS   = -v*dCdy-u*dCdx+dCdx2+dCdy2+source(x(i),y(j));
         %TIME DERIVATIVE
                 C_star(i,j)= C(i,j)+dt*RHS;
-        %update C
-                C(i,j)=C_star(i,j);
+
     end
-    
+        %update C
+                C=C_star;
     % Apply Neumann boundary conditions (zero slope)
     C( 1,:)=C( 2,:);
     C(Nx,:)=C(Nx-1,:);
