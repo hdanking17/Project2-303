@@ -1,6 +1,9 @@
-%EMEC303_Project2
+%EMEC 303
+%Project 2
+%Diego Armstrong, Hanna King, Carter Storrusten
 
-clear; clc
+clear all
+clc
 
 % Inputs
 Nx=25; % Grid points in x
@@ -11,22 +14,20 @@ D=10; % Diffusion coefficient (miles^2/day)
 plot_freq=100; % Plot frequency (steps)
 
 % Pollutant source
-yo=???
-xo=???
-A=1e4; %ppm (parts per million)
-sigma=0.01;
-source=@(x,y) ???
+yo=45.817315;
+xo=-111.073837;
+A=1e4;
+sigma=.01;
+source=@(x,y) A*exp(-((x-xo)^2+(y-yo)^2)/(2*sigma^2));
 
 % Load wind data
-data=csvread(`wind.csv',1.0);
+data=csvread('wind.csv',1.0);
 wind_mean=data(:,1); % Mean wind speed (mph)
-wind_dir =data(:,3); % Wind direction in degrees from north
+wind_dir =data(:,3); % Wind direction in degrees from nort
 
 % Create grid
-lat(1)=45.5; 
-lon(1)=-111.6; % Extents
-lat(2)=46.0; 
-lon(2)=-110.8;
+lat(1)=45.5; lon(1)=-111.6; % Extents
+lat(2)=46.0; lon(2)=-110.8;
 x=linspace(lon(1),lon(2),Nx); % x & y values
 y=linspace(lat(1),lat(2),Ny);
 dx=latlon2dist(mean(lat),lon(1),mean(lat),lon(2))/Nx; % dx in miles
@@ -37,19 +38,23 @@ C=zeros(Nx,Ny); % Concentration
 t=0; % Time
 plot_count=0; % Counter to only plot every plot_freq steps
 
-%% Create plot with map
+% Create plot with map
 figure(1); clf(1)
+
 % Get current axes
 ax1=gca;
+
 % Plot google map
 axis([x(1),x(Nx),y(1),y(Ny)]);
-plot_google_map('APIKey','AIzaSyDUz4oSBuVc8LvjAqa26WARGJR9jw4-Ghk')
+plot_google_map('APIKey','AIzaSyDUz4oSBuVc8LvjAqa26WARGJR9jw4-Ghk');
 plot_google_map('AutoAxis',1);
 % Plot source location
 plot(xo,yo,'r.','Markersize',50);
+
 % Create second axes for contour plot
 ax2=axes();
 set(ax2,'visible','off')
+
 % Add contour plot with colorbar
 hold on
 [c,hc]=contour(x,y,C');
@@ -57,10 +62,12 @@ set(hc,'XData',x);
 set(hc,'YData',y);
 hcb=colorbar;
 ylabel(hcb,'Concentration','Fontsize',15)
+
 % Add axes labels
 xlabel(ax1,'Longitude')
 ylabel(ax1,'Latitude')
 set(ax1,'Fontsize',15)
+
 % Scale axes to match
 P1=get(ax1,'Position');
 P2=get(ax2,'Position');
@@ -72,27 +79,38 @@ set(ax1,'Position',pos)
 set(ax2,'Position',pos)
 linkaxes([ax1,ax2])
 
-%% Loop over time
 Nt=(Ndays-1)/dt;
 for n=1:Nt
-    
     % Update time
     t=t+dt;
     
     % Compute velocity interpolated to this time
     day =1+floor(t);
     frac=1+t-day;
+    
     % Wind speed and direction
     mywind_spd=(1-frac)*wind_mean(day)+frac*wind_mean(day+1);
     mywind_dir=(1-frac)*wind_dir (day)+frac*wind_dir (day+1);
+    
     % x and y components of wind velocity (miles/day)
     u=-24*mywind_spd*sind(mywind_dir);
     v=-24*mywind_spd*cosd(mywind_dir);
     
     % Update concentration by solving Eq. 2
-    ???
-    ???
-    ???
+    for j=2:Ny-1
+        for i=2:Nx-1
+            if u>=0
+                dCdx=u*((C(i,j)-C(i-1,j))/dx);
+            else if u<=0
+                dCdx=u*((C(i+1,j)-C(i,j))/dx);
+                end
+            end
+    dCdx=(C(i+1,j)-2*C(i,j)+C(i-1,j))/(dx^2);
+    dCdy=(C(i+1,j)-2*C(i,j)+C(i-1,j))/(dy^2);
+    RHS=dCdx+dCdy+source(i,j);
+    C(i,j)=C(i,j)+dt*RHS;
+        end
+    end
     
     % Apply Neumann boundary conditions (zero slope)
     C( 1,:)=C( 2,:);
