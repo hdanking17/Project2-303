@@ -85,7 +85,7 @@ linkaxes([ax1,ax2])
 % for i=2:Nx-1
 %     Cnew(i)=C(i)+dt*(-Nx*C(i+1)-C(i-1))/(2*dx);
 % end
-C=rand(size(C));
+%C=rand(size(C));
 Nt=(Ndays-1)/dt;
 for n=1:Nt
     % Update time
